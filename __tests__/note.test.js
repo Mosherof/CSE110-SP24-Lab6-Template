@@ -9,14 +9,43 @@ describe('Basic user flow for Website', () => {
       console.log('Checking the number of notes added...');
       const addNote = await page.$("button");
       await addNote.click();
-      const notes = await page.$$eval("textarea");
-      expect(notes).toBe("20");
+      const firstNote = await page.$$eval("textarea", notes => notes);
+      await addNote.click();
+      const twoNotes = await page.$$eval("textarea", notes => notes);
+      expect(firstNote.length==1 && twoNotes.length==2).toBe(true);
     }, 50000);
 
-    // Checking a new note can be editted after being saved
+     // Checking a note can be deleted
+     it('Checking a note can be deleted', async () => {
+      console.log('Checking a note can be deleted');
+      // first add a note (so you know there is a note to be deleted)
+      const addNote = await page.$("button");
+      await addNote.click();
+      const firstCount = await page.$$eval("textarea", notes => notes.length);
+
+      // delete a note
+      const note = await page.$("textarea");
+      await note.click({clickCount: 2});
+      const secondCount = await page.$$eval("textarea", notes => notes.length);
+
+      expect(firstCount-secondCount).toBe(1);
+    }, 50000);
+
+    // Checking a new notes can be written after being saved
     it('Checking new note can be editted', async () => {
         console.log('Checking new note can be editted');
-       // expect(count).toBe("20");
+        notes = await  page.$$("textarea");
+        for (let i = 0; i < notes.length; i++) {
+          const note = notes[i];
+          await note.click();
+          await page.keyboard.type('I am writing into a new note!', {delay: 30});
+        }
+        //await notes[0].click();
+
+        const messages = page.$$eval("textarea", notes => notes);
+
+
+       expect(messages).toBe("20");
       }, 50000);
 
     // Checking an existing note can be editted after being saved
@@ -28,12 +57,9 @@ describe('Basic user flow for Website', () => {
     // Checking that notes are saved even after refreshing the page
     it('Checking notes are saved even after refreshing the page', async () => {
         console.log('Checking notes are saved even after refreshing the page');
-        //expect(count).toBe("20");
-      }, 50000);
+        const count = await page.$eval("textarea", notes => notes);
+        //await page.reload();
 
-    // Checking a note can be deleted
-    it('Checking a note can be deleted', async () => {
-        console.log('Checking a note can be deleted');
         //expect(count).toBe("20");
       }, 50000);
   });
