@@ -57,7 +57,7 @@ function addNote(){
     noteCount++
 }
 
-//updates content of given note
+//Updates Note with new given content
 function updateNote(id, newContent) {
     notes = getNotes();
     updatedNote = getNote(notes, id);
@@ -70,7 +70,7 @@ function getNotes() {
     return JSON.parse(localStorage.getItem("stickynotes-notes") || "[]");
 }
 
-//Get a certain note based of id, and notes array
+//Get a certain note based of id
 function getNote(notes, id) {
     return notes.filter(note => note.id == id)[0];
 }

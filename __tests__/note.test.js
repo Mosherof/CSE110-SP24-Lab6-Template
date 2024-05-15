@@ -34,33 +34,64 @@ describe('Basic user flow for Website', () => {
     // Checking a new notes can be written after being saved
     it('Checking new note can be editted', async () => {
         console.log('Checking new note can be editted');
-        notes = await  page.$$("textarea");
-        for (let i = 0; i < notes.length; i++) {
-          const note = notes[i];
+        const notes = await  page.$$("textarea");
+        for (let i=0; i<notes.length; i++) {
+          note = notes[i];
           await note.click();
-          await page.keyboard.type('I am writing into a new note!', {delay: 30});
+          await page.keyboard.type('I am writing into a new note!');
+          await page.keyboard.press('Tab');
         }
-        //await notes[0].click();
 
-        const messages = page.$$eval("textarea", notes => notes);
+        const newMessages= await page.$$eval("textarea", texts => {
+          return texts.map(item => {
+            return data = item.innerHTML;
+          });
+        });
 
-
-       expect(messages).toBe("20");
+       expect(newMessages).toBe(['I am writing into a new note!'] * newMessages.length);
       }, 50000);
 
-    // Checking an existing note can be editted after being saved
-    it('Checking existing note can be editted', async () => {
-        console.log('Checking existing note can be editted');
-        //expect(count).toBe("20");
-      }, 50000);
+    // Check to make sure a pre-existing note can be editted and saved
+    it('Checking pre-existing note can be editted and saved', async () => {
+      console.log('Checking pre-existing note can be editted...');
+      const notes = await page.$("textarea");
+      const originalMessage = 'I am writing into a new note!'; //await page.$eval("textarea", text => text.innerHTML);
+      await note.click();
+      for (let i = 0; i < originalMessage.length; i++) {
+        await page.keyboard.press('Backspace');
+      }
+      await page.keyboard.type('I am changing this note');
+      const newMessage = await page.$eval("textarea", text => text.innerHTML);
+      await page.keyboard.press('Tab');
+      expect(newMessage).toBe('I am changing this note');
+    }, 50000);
 
-    // Checking that notes are saved even after refreshing the page
-    it('Checking notes are saved even after refreshing the page', async () => {
-        console.log('Checking notes are saved even after refreshing the page');
-        const count = await page.$eval("textarea", notes => notes);
-        //await page.reload();
 
-        //expect(count).toBe("20");
-      }, 50000);
+    // Check to make sure content stays after reloading page
+    it('Checking reloading content does not change page', async () => {
+      console.log('Checking reloading content does not change page');
+      const notes = await page.$$eval("textarea", note => {
+        return note.map(item => {
+          return data = item.innerHTML;
+        });
+      });
+      await page.reload();
+      let newNotes = [];
+      try {
+        newNotes = await page.$eval("textarea",  note => {
+          return note.map(item => {
+            return data = item.innerHTML;
+          });
+        });
+      }
+      catch(err) {
+        newNotes = []
+      }
+      expect(notes).toBe(newNotes);
+
+    }, 50000);
+
+
+
   });
   
